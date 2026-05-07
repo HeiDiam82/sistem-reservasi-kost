@@ -1,19 +1,22 @@
-import { findByUser, markRead as _markRead, markAllRead as _markAllRead } from '../models/notifikasiModel';
-import AppError from '../utils/AppError';
+import notifikasiModel from '../models/notifikasiModel.js';
+import db from '../config/db.js';
 
-const getByUser = async (userId) => {
-    const notifs = await findByUser(userId);
+export const getByUser = async (userId) => {
+    const notifs = await notifikasiModel.findByUser(userId);
     const unread_count = notifs.filter(n => !n.is_read).length;
     return { notifs, unread_count };
 };
 
-const markRead = async (id, userId) => {
-    const updated = await _markRead(id, userId);
-    if (!updated) throw new AppError('Notifikasi tidak ditemukan.', 404);
+export const create = async (client, data) => {
+    return await notifikasiModel.create(client, data);
 };
 
-const markAllRead = async (userId) => {
-    await _markAllRead(userId);
+export const markRead = async (id, userId) => {
+    return await notifikasiModel.markRead(id, userId);
 };
 
-export default { getByUser, markRead, markAllRead };
+export const markAllRead = async (userId) => {
+    return await notifikasiModel.markAllRead(userId);
+};
+
+export default { getByUser, create, markRead, markAllRead };

@@ -1,7 +1,7 @@
-import { query } from '../config/db';
+import db from '../config/db.js';
 
-const findByUser = async (userId) => {
-    const result = await query(
+export const findByUser = async (userId) => {
+    const result = await db.query(
         `SELECT * FROM notifikasi
          WHERE user_id = $1
          ORDER BY created_at DESC`,
@@ -10,7 +10,7 @@ const findByUser = async (userId) => {
     return result.rows;
 };
 
-const create = async (client, { user_id, judul, pesan }) => {
+export const create = async (client, { user_id, judul, pesan }) => {
     const result = await client.query(
         `INSERT INTO notifikasi (user_id, judul, pesan)
          VALUES ($1, $2, $3)
@@ -20,8 +20,8 @@ const create = async (client, { user_id, judul, pesan }) => {
     return result.rows[0];
 };
 
-const markRead = async (id, userId) => {
-    const result = await query(
+export const markRead = async (id, userId) => {
+    const result = await db.query(
         `UPDATE notifikasi
          SET is_read = TRUE
          WHERE notifikasi_id = $1 AND user_id = $2
@@ -31,8 +31,8 @@ const markRead = async (id, userId) => {
     return result.rows[0] || null;
 };
 
-const markAllRead = async (userId) => {
-    await query(
+export const markAllRead = async (userId) => {
+    await db.query(
         `UPDATE notifikasi SET is_read = TRUE
          WHERE user_id = $1 AND is_read = FALSE`,
         [userId]

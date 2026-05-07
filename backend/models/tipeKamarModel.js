@@ -1,48 +1,33 @@
-import { query } from '../config/db';
+import db from '../config/db.js';
 
-const findAll = async () => {
-    const result = await query(
-        `SELECT * FROM tipe_kamar ORDER BY created_at DESC`
-    );
+export const findAll = async () => {
+    const result = await db.query('SELECT * FROM tipe_kamar ORDER BY nama_tipe ASC');
     return result.rows;
 };
 
-const findById = async (id) => {
-    const result = await query(
-        `SELECT * FROM tipe_kamar WHERE tipe_id = $1`,
-        [id]
-    );
+export const findById = async (id) => {
+    const result = await db.query('SELECT * FROM tipe_kamar WHERE tipe_id = $1', [id]);
     return result.rows[0] || null;
 };
 
-const create = async ({ nama_tipe, harga_bulan, fasilitas }) => {
-    const result = await query(
-        `INSERT INTO tipe_kamar (nama_tipe, harga_bulan, fasilitas)
-         VALUES ($1, $2, $3) RETURNING *`,
-        [nama_tipe, harga_bulan, fasilitas || null]
+export const create = async ({ nama_tipe, harga_bulan, fasilitas }) => {
+    const result = await db.query(
+        'INSERT INTO tipe_kamar (nama_tipe, harga_bulan, fasilitas) VALUES ($1, $2, $3) RETURNING *',
+        [nama_tipe, harga_bulan, fasilitas]
     );
     return result.rows[0];
 };
 
-const update = async (id, { nama_tipe, harga_bulan, fasilitas }) => {
-    const result = await query(
-        `UPDATE tipe_kamar
-         SET nama_tipe    = COALESCE($1, nama_tipe),
-             harga_bulan  = COALESCE($2, harga_bulan),
-             fasilitas    = COALESCE($3, fasilitas)
-         WHERE tipe_id = $4
-         RETURNING *`,
+export const update = async (id, { nama_tipe, harga_bulan, fasilitas }) => {
+    const result = await db.query(
+        'UPDATE tipe_kamar SET nama_tipe = $1, harga_bulan = $2, fasilitas = $3 WHERE tipe_id = $4 RETURNING *',
         [nama_tipe, harga_bulan, fasilitas, id]
     );
     return result.rows[0] || null;
 };
 
-const remove = async (id) => {
-    const result = await query(
-        `DELETE FROM tipe_kamar WHERE tipe_id = $1 RETURNING *`,
-        [id]
-    );
-    return result.rows[0] || null;
+export const remove = async (id) => {
+    await db.query('DELETE FROM tipe_kamar WHERE tipe_id = $1', [id]);
 };
 
 export default { findAll, findById, create, update, remove };

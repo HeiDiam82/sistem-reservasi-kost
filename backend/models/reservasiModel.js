@@ -1,13 +1,13 @@
-import { query } from '../config/db';
+import db from '../config/db.js';
 
-const findAll = async () => {
-    const result = await query(
+export const findAll = async () => {
+    const result = await db.query(
         `SELECT r.*,
                 u.email, p.nama AS nama_penyewa, p.no_hp,
                 k.nomor_kamar, k.lantai,
                 t.nama_tipe, t.harga_bulan
          FROM reservasi r
-         JOIN "user" u ON r.user_id = u.user_id
+         JOIN users u ON r.user_id = u.user_id
          LEFT JOIN profil_penyewa p ON r.user_id = p.user_id
          JOIN kamar k ON r.kamar_id = k.kamar_id
          LEFT JOIN tipe_kamar t ON k.tipe_id = t.tipe_id
@@ -16,8 +16,8 @@ const findAll = async () => {
     return result.rows;
 };
 
-const findAllByUser = async (userId) => {
-    const result = await query(
+export const findAllByUser = async (userId) => {
+    const result = await db.query(
         `SELECT r.*,
                 k.nomor_kamar, k.lantai, k.foto_kamar,
                 t.nama_tipe, t.harga_bulan, t.fasilitas
@@ -31,14 +31,14 @@ const findAllByUser = async (userId) => {
     return result.rows;
 };
 
-const findById = async (id) => {
-    const result = await query(
+export const findById = async (id) => {
+    const result = await db.query(
         `SELECT r.*,
                 u.email, p.nama AS nama_penyewa, p.no_hp,
                 k.nomor_kamar, k.lantai, k.foto_kamar,
                 t.nama_tipe, t.harga_bulan, t.fasilitas
          FROM reservasi r
-         JOIN "user" u ON r.user_id = u.user_id
+         JOIN users u ON r.user_id = u.user_id
          LEFT JOIN profil_penyewa p ON r.user_id = p.user_id
          JOIN kamar k ON r.kamar_id = k.kamar_id
          LEFT JOIN tipe_kamar t ON k.tipe_id = t.tipe_id
@@ -48,7 +48,7 @@ const findById = async (id) => {
     return result.rows[0] || null;
 };
 
-const create = async (client, { user_id, kamar_id, tanggal_masuk, tanggal_keluar, total_harga }) => {
+export const create = async (client, { user_id, kamar_id, tanggal_masuk, tanggal_keluar, total_harga }) => {
     const result = await client.query(
         `INSERT INTO reservasi (user_id, kamar_id, tanggal_masuk, tanggal_keluar, total_harga, status)
          VALUES ($1, $2, $3, $4, $5, 'menunggu')
@@ -58,7 +58,7 @@ const create = async (client, { user_id, kamar_id, tanggal_masuk, tanggal_keluar
     return result.rows[0];
 };
 
-const updateStatus = async (client, id, status) => {
+export const updateStatus = async (client, id, status) => {
     const result = await client.query(
         `UPDATE reservasi SET status = $1 WHERE reservasi_id = $2 RETURNING *`,
         [status, id]
@@ -66,9 +66,8 @@ const updateStatus = async (client, id, status) => {
     return result.rows[0] || null;
 };
 
-/** Cek apakah ada reservasi yang tanggalnya bentrok untuk kamar yang sama */
-const findKonflikTanggal = async (kamar_id, tanggal_masuk, tanggal_keluar) => {
-    const result = await query(
+export const findKonflikTanggal = async (kamar_id, tanggal_masuk, tanggal_keluar) => {
+    const result = await db.query(
         `SELECT reservasi_id FROM reservasi
          WHERE kamar_id = $1
            AND status IN ('dikonfirmasi', 'berjalan')

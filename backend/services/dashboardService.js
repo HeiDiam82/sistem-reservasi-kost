@@ -1,5 +1,7 @@
-import { getStats as _getStats } from '../models/dashboardModel';
+import dashboardModel from '../models/dashboardModel.js';
 
-const getStats = async () => _getStats();
+export const getStats = async () => {
+    return await dashboardModel.getStats();
+};
 
 export default { getStats };

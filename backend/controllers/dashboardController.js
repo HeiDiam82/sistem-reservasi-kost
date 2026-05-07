@@ -1,11 +1,10 @@
-import dashboardService from '../services/dashboardService';
-import asyncHandler from '../utils/asyncHandler';
-import response from '../utils/response';
-const { sendSuccess } = response;
+import dashboardService from '../services/dashboardService.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import { sendSuccess } from '../utils/response.js';
 
-const getDashboardStats = asyncHandler(async (req, res) => {
-    const data = await dashboardService.getStats();
-    sendSuccess(res, data);
+export const getDashboardStats = asyncHandler(async (req, res) => {
+    const stats = await dashboardService.getStats();
+    sendSuccess(res, stats);
 });
 
 export default { getDashboardStats };

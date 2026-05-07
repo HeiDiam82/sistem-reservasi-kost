@@ -1,30 +1,28 @@
-import { findAll, findById, create as _create, update as _update, remove as _remove } from '../models/tipeKamarModel';
-import AppError from '../utils/AppError';
+import tipeKamarModel from '../models/tipeKamarModel.js';
+import AppError from '../utils/AppError.js';
 
-const getAll = async () => findAll();
-
-const getById = async (id) => {
-    const tipe = await findById(id);
-    if (!tipe) throw new AppError('Tipe kamar tidak ditemukan.', 404);
-    return tipe;
+export const getAll = async () => {
+    return await tipeKamarModel.findAll();
 };
 
-const create = async ({ nama_tipe, harga_bulan, fasilitas }) => {
-    if (!nama_tipe || !harga_bulan) {
-        throw new AppError('Nama tipe dan harga bulan wajib diisi.', 400);
-    }
-    return _create({ nama_tipe, harga_bulan, fasilitas });
+export const getById = async (id) => {
+    const data = await tipeKamarModel.findById(id);
+    if (!data) throw new AppError('Tipe kamar tidak ditemukan.', 404);
+    return data;
 };
 
-const update = async (id, body) => {
-    const updated = await _update(id, body);
+export const create = async (data) => {
+    return await tipeKamarModel.create(data);
+};
+
+export const update = async (id, data) => {
+    const updated = await tipeKamarModel.update(id, data);
     if (!updated) throw new AppError('Tipe kamar tidak ditemukan.', 404);
     return updated;
 };
 
-const remove = async (id) => {
-    const deleted = await _remove(id);
-    if (!deleted) throw new AppError('Tipe kamar tidak ditemukan.', 404);
+export const remove = async (id) => {
+    await tipeKamarModel.remove(id);
 };
 
 export default { getAll, getById, create, update, remove };

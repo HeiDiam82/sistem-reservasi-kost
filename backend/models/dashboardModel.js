@@ -1,6 +1,6 @@
-import { query } from '../config/db';
+import db from '../config/db.js';
 
-const getStats = async () => {
+export const getStats = async () => {
     const [
         totalKamar,
         kamarTersedia,
@@ -9,18 +9,18 @@ const getStats = async () => {
         reservasiMenunggu,
         pembayaranPending
     ] = await Promise.all([
-        query(`SELECT COUNT(*) FROM kamar`),
-        query(`SELECT COUNT(*) FROM kamar WHERE status = 'tersedia'`),
-        query(`SELECT COUNT(*) FROM reservasi WHERE status IN ('dikonfirmasi', 'berjalan')`),
-        query(
+        db.query(`SELECT COUNT(*) FROM kamar`),
+        db.query(`SELECT COUNT(*) FROM kamar WHERE status = 'tersedia'`),
+        db.query(`SELECT COUNT(*) FROM reservasi WHERE status IN ('dikonfirmasi', 'berjalan')`),
+        db.query(
             `SELECT COALESCE(SUM(jumlah_bayar), 0) AS total
              FROM pembayaran
              WHERE status = 'sukses'
                AND EXTRACT(MONTH FROM tanggal_bayar) = EXTRACT(MONTH FROM CURRENT_DATE)
                AND EXTRACT(YEAR  FROM tanggal_bayar) = EXTRACT(YEAR  FROM CURRENT_DATE)`
         ),
-        query(`SELECT COUNT(*) FROM reservasi WHERE status = 'menunggu'`),
-        query(`SELECT COUNT(*) FROM pembayaran WHERE status = 'pending'`)
+        db.query(`SELECT COUNT(*) FROM reservasi WHERE status = 'menunggu'`),
+        db.query(`SELECT COUNT(*) FROM pembayaran WHERE status = 'pending'`)
     ]);
 
     return {

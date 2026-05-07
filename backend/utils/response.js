@@ -1,11 +1,14 @@
-const sendSuccess = (res, data = null, message = 'Berhasil.', statusCode = 200) => {
-    const payload = { success: true, message };
-    if (data !== null) payload.data = data;
-    return res.status(statusCode).json(payload);
+export const sendSuccess = (res, data, message = 'Berhasil.', statusCode = 200) => {
+    res.status(statusCode).json({
+        success: true,
+        message,
+        data
+    });
 };
 
-const sendError = (res, message, statusCode = 400) => {
-    return res.status(statusCode).json({ success: false, message });
+export const sendError = (res, message = 'Gagal.', statusCode = 400) => {
+    res.status(statusCode).json({
+        success: false,
+        message
+    });
 };
-
-export default { sendSuccess, sendError };

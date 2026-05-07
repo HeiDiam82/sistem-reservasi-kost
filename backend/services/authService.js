@@ -1,68 +1,42 @@
-import { hash, compare } from 'bcrypt';
-import { pool } from '../config/db';
-import { findByEmail, createUser, createProfile, findById } from '../models/userModel';
-import AppError from '../utils/AppError';
+import bcrypt from 'bcrypt';
+import userModel from '../models/userModel.js';
+import { pool } from '../config/db.js';
+import AppError from '../utils/AppError.js';
 
-const SALT_ROUNDS = 10;
-
-/**
- * Registrasi penyewa baru.
- * Menggunakan transaksi karena menulis ke 2 tabel sekaligus.
- */
-const register = async ({ email, password, nama, no_hp }) => {
-    if (!email || !password || !nama) {
-        throw new AppError('Email, password, dan nama wajib diisi.', 400);
-    }
+export const register = async ({ email, password, nama, no_hp }) => {
+    const existingUser = await userModel.findByEmail(email);
+    if (existingUser) throw new AppError('Email sudah terdaftar.', 400);
 
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-
-        const existing = await findByEmail(email);
-        if (existing) throw new AppError('Email sudah terdaftar.', 400);
-
-        const hashedPassword = await hash(password, SALT_ROUNDS);
-        const newUser = await createUser(client, { email, hashedPassword });
-        await createProfile(client, { userId: newUser.user_id, nama, noHp: no_hp });
-
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await userModel.createUser(client, { email, hashedPassword });
+        await userModel.createProfile(client, { userId: newUser.user_id, nama, noHp: no_hp });
         await client.query('COMMIT');
         return { user_id: newUser.user_id, email: newUser.email, role: newUser.role };
-    } catch (err) {
+    } catch (error) {
         await client.query('ROLLBACK');
-        throw err;
+        throw error;
     } finally {
         client.release();
     }
 };
 
-/**
- * Login: verifikasi kredensial dan kembalikan data user.
- */
-const login = async ({ email, password }) => {
-    if (!email || !password) {
-        throw new AppError('Email dan password wajib diisi.', 400);
-    }
-
-    const user = await findByEmail(email);
+export const login = async ({ email, password }) => {
+    const user = await userModel.findByEmail(email);
     if (!user) throw new AppError('Email atau password salah.', 401);
-    if (user.status === 'nonaktif') throw new AppError('Akun Anda telah dinonaktifkan.', 403);
 
-    const isValid = await compare(password, user.password);
-    if (!isValid) throw new AppError('Email atau password salah.', 401);
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new AppError('Email atau password salah.', 401);
 
-    return {
-        user_id: user.user_id,
-        email:   user.email,
-        role:    user.role,
-        nama:    user.nama
-    };
+    if (user.status !== 'aktif') throw new AppError('Akun Anda dinonaktifkan.', 403);
+
+    return { user_id: user.user_id, email: user.email, role: user.role, nama: user.nama };
 };
 
-/**
- * Ambil data user berdasarkan ID sesi.
- */
-const getMe = async (userId) => {
-    const user = await findById(userId);
+export const getMe = async (id) => {
+    const user = await userModel.findById(id);
     if (!user) throw new AppError('User tidak ditemukan.', 404);
     return user;
 };

@@ -1,26 +1,30 @@
-import reservasiService from '../services/reservasiService';
-import asyncHandler from '../utils/asyncHandler';
-import responseUtils from '../utils/response';
-const { sendSuccess } = responseUtils;
+import tipeKamarService from '../services/tipeKamarService.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import { sendSuccess } from '../utils/response.js';
 
-const getAll = asyncHandler(async (req, res) => {
-    const data = await reservasiService.getAll(req.session.user);
+export const getAll = asyncHandler(async (req, res) => {
+    const data = await tipeKamarService.getAll();
     sendSuccess(res, data);
 });
 
-const getById = asyncHandler(async (req, res) => {
-    const data = await reservasiService.getById(req.params.id, req.session.user);
+export const getById = asyncHandler(async (req, res) => {
+    const data = await tipeKamarService.getById(req.params.id);
     sendSuccess(res, data);
 });
 
-const create = asyncHandler(async (req, res) => {
-    const data = await reservasiService.create(req.body, req.session.user.id);
-    sendSuccess(res, data, 'Reservasi berhasil dibuat. Menunggu konfirmasi admin.', 201);
+export const create = asyncHandler(async (req, res) => {
+    const data = await tipeKamarService.create(req.body);
+    sendSuccess(res, data, 'Tipe kamar berhasil dibuat.', 201);
 });
 
-const updateStatus = asyncHandler(async (req, res) => {
-    await reservasiService.updateStatus(req.params.id, req.body.status);
-    sendSuccess(res, null, `Status reservasi berhasil diubah menjadi ${req.body.status}.`);
+export const update = asyncHandler(async (req, res) => {
+    const data = await tipeKamarService.update(req.params.id, req.body);
+    sendSuccess(res, data, 'Tipe kamar berhasil diupdate.');
 });
 
-export default { getAll, getById, create, updateStatus };
+export const remove = asyncHandler(async (req, res) => {
+    await tipeKamarService.remove(req.params.id);
+    sendSuccess(res, null, 'Tipe kamar berhasil dihapus.');
+});
+
+export default { getAll, getById, create, update, remove };

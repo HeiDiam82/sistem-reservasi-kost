@@ -1,7 +1,7 @@
-import { Router } from 'express';
-const router = Router();
-import { getNotifikasi, markAsRead, markAllAsRead } from '../controllers/notifikasiController';
-import { requireAuth } from '../middlewares/authMiddleware';
+import express from 'express';
+const router = express.Router();
+import { getNotifikasi, markAsRead, markAllAsRead } from '../controllers/notifikasiController.js';
+import { requireAuth } from '../middlewares/authMiddleware.js';
 
 router.get('/', requireAuth, getNotifikasi);
 router.put('/read-all', requireAuth, markAllAsRead);

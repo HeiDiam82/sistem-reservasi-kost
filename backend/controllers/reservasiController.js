@@ -1,26 +1,30 @@
-import reservasiService from '../services/reservasiService';
-import asyncHandler from '../utils/asyncHandler';
-import response from '../utils/response';
-const { sendSuccess } = response;
+import reservasiService from '../services/reservasiService.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import { sendSuccess } from '../utils/response.js';
 
-const getAll = asyncHandler(async (req, res) => {
-    const data = await reservasiService.getAll(req.session.user);
+export const getAll = asyncHandler(async (req, res) => {
+    let data;
+    if (req.session.user.role === 'admin') {
+        data = await reservasiService.getAll();
+    } else {
+        data = await reservasiService.getByUser(req.session.user.id);
+    }
     sendSuccess(res, data);
 });
 
-const getById = asyncHandler(async (req, res) => {
-    const data = await reservasiService.getById(req.params.id, req.session.user);
+export const getById = asyncHandler(async (req, res) => {
+    const data = await reservasiService.getById(req.params.id);
     sendSuccess(res, data);
 });
 
-const create = asyncHandler(async (req, res) => {
-    const data = await reservasiService.create(req.body, req.session.user.id);
-    sendSuccess(res, data, 'Reservasi berhasil dibuat. Menunggu konfirmasi admin.', 201);
+export const create = asyncHandler(async (req, res) => {
+    const data = await reservasiService.create(req.session.user.id, req.body);
+    sendSuccess(res, data, 'Reservasi berhasil diajukan.', 201);
 });
 
-const updateStatus = asyncHandler(async (req, res) => {
-    await reservasiService.updateStatus(req.params.id, req.body.status);
-    sendSuccess(res, null, `Status reservasi berhasil diubah menjadi ${req.body.status}.`);
+export const updateStatus = asyncHandler(async (req, res) => {
+    const data = await reservasiService.updateStatus(req.params.id, req.body);
+    sendSuccess(res, data, 'Status reservasi berhasil diperbarui.');
 });
 
 export default { getAll, getById, create, updateStatus };

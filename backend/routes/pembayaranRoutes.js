@@ -1,10 +1,10 @@
-import { Router } from 'express';
-const router = Router();
-import { getAllPembayaran, createPembayaran, updateStatusPembayaran } from '../controllers/pembayaranController';
-import { requireAuth, requireAdmin } from '../middlewares/authMiddleware';
+import express from 'express';
+const router = express.Router();
+import { getAll, create, updateStatus } from '../controllers/pembayaranController.js';
+import { requireAuth, requireAdmin } from '../middlewares/authMiddleware.js';
 
-router.get('/', requireAuth, getAllPembayaran);
-router.post('/', requireAuth, createPembayaran);
-router.put('/:id/status', requireAdmin, updateStatusPembayaran);
+router.get('/', requireAuth, getAll);
+router.post('/', requireAuth, create);
+router.put('/:id/status', requireAdmin, updateStatus);
 
 export default router;

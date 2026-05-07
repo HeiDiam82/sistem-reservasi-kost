@@ -1,37 +1,28 @@
-import { findAll, findById, findByNomorKamar, create as _create, update as _update, hasActiveReservasi, remove as _remove } from '../models/kamarModel';
-import AppError from '../utils/AppError';
+import kamarModel from '../models/kamarModel.js';
+import AppError from '../utils/AppError.js';
 
-const getAll = async () => findAll();
-
-const getById = async (id) => {
-    const kamar = await findById(id);
-    if (!kamar) throw new AppError('Kamar tidak ditemukan.', 404);
-    return kamar;
+export const getAll = async () => {
+    return await kamarModel.findAll();
 };
 
-const create = async ({ tipe_id, nomor_kamar, lantai, foto_kamar }) => {
-    if (!tipe_id || !nomor_kamar) {
-        throw new AppError('Tipe ID dan nomor kamar wajib diisi.', 400);
-    }
-    const existing = await findByNomorKamar(nomor_kamar);
-    if (existing) throw new AppError('Nomor kamar sudah digunakan.', 400);
-
-    return _create({ tipe_id, nomor_kamar, lantai, foto_kamar });
+export const getById = async (id) => {
+    const data = await kamarModel.findById(id);
+    if (!data) throw new AppError('Kamar tidak ditemukan.', 404);
+    return data;
 };
 
-const update = async (id, body) => {
-    const updated = await _update(id, body);
+export const create = async (data) => {
+    return await kamarModel.create(data);
+};
+
+export const update = async (id, data) => {
+    const updated = await kamarModel.update(id, data);
     if (!updated) throw new AppError('Kamar tidak ditemukan.', 404);
     return updated;
 };
 
-const remove = async (id) => {
-    const hasActive = await hasActiveReservasi(id);
-    if (hasActive) {
-        throw new AppError('Kamar tidak bisa dihapus karena memiliki reservasi aktif.', 400);
-    }
-    const deleted = await _remove(id);
-    if (!deleted) throw new AppError('Kamar tidak ditemukan.', 404);
+export const remove = async (id) => {
+    await kamarModel.remove(id);
 };
 
 export default { getAll, getById, create, update, remove };
