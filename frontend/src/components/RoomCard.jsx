@@ -61,13 +61,13 @@ const RoomCard = ({ room }) => {
 
         <Link
           to={`/rooms/${kamar_id}`}
-          className={`block w-full text-center py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
+          className={`block w-full text-center py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
             tersedia
-              ? 'bg-primary text-white hover:bg-primary-light shadow-md hover:shadow-lg'
+              ? 'bg-primary text-white hover:bg-primary-light shadow-md hover:shadow-lg active:scale-95'
               : 'bg-slate-100 text-slate-400 cursor-not-allowed'
           }`}
         >
-          {tersedia ? 'Lihat Detail & Booking' : 'Tidak Tersedia'}
+          {tersedia ? 'Lihat Detail & Booking' : 'Kamar Penuh'}
         </Link>
       </div>
     </div>

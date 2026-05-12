@@ -212,26 +212,32 @@ const RoomDetails = ({ user }) => {
                 </div>
               ) : (
                 <form onSubmit={handleBooking} className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">📅 Tanggal Masuk</label>
-                    <input
-                      type="date" required
-                      min={new Date().toISOString().split('T')[0]}
-                      value={bookingData.tanggal_masuk}
-                      onChange={(e) => setBookingData({ ...bookingData, tanggal_masuk: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">📅 Tanggal Keluar (Estimasi)</label>
-                    <input
-                      type="date" required
-                      min={bookingData.tanggal_masuk || new Date().toISOString().split('T')[0]}
-                      value={bookingData.tanggal_keluar}
-                      onChange={(e) => setBookingData({ ...bookingData, tanggal_keluar: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm"
-                    />
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
+                        <span className="text-secondary text-lg">📅</span> Tanggal Masuk
+                      </label>
+                      <input
+                        type="date" required
+                        min={new Date().toISOString().split('T')[0]}
+                        value={bookingData.tanggal_masuk}
+                        onChange={(e) => setBookingData({ ...bookingData, tanggal_masuk: e.target.value })}
+                        className="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-secondary focus:ring-4 focus:ring-secondary/10 outline-none transition-all text-sm font-medium"
+                      />
+                    </div>
+  
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
+                        <span className="text-secondary text-lg">📅</span> Tanggal Keluar (Estimasi)
+                      </label>
+                      <input
+                        type="date" required
+                        min={bookingData.tanggal_masuk || new Date().toISOString().split('T')[0]}
+                        value={bookingData.tanggal_keluar}
+                        onChange={(e) => setBookingData({ ...bookingData, tanggal_keluar: e.target.value })}
+                        className="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-secondary focus:ring-4 focus:ring-secondary/10 outline-none transition-all text-sm font-medium"
+                      />
+                    </div>
                   </div>
 
                   {/* Price summary */}

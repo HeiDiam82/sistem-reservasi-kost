@@ -102,10 +102,10 @@ const Home = () => {
               Booking online mudah, cepat, dan tanpa ribet.
             </p>
 
-            <div className="flex flex-wrap gap-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <div className="flex flex-wrap gap-5 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <a
                 href="#listings"
-                className="bg-secondary text-white px-8 py-4 rounded-2xl font-bold text-base hover:bg-secondary-light transition-all shadow-xl hover:shadow-secondary/40 hover:-translate-y-0.5 flex items-center gap-2"
+                className="bg-secondary text-white px-10 py-4 rounded-2xl font-bold text-base hover:bg-secondary-light transition-all shadow-xl hover:shadow-secondary/40 hover:-translate-y-1 flex items-center gap-2"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -114,7 +114,7 @@ const Home = () => {
               </a>
               <a
                 href="#why-us"
-                className="bg-white/10 backdrop-blur-md text-white px-8 py-4 rounded-2xl font-bold text-base border border-white/25 hover:bg-white/20 transition-all"
+                className="bg-white/10 backdrop-blur-md text-white px-10 py-4 rounded-2xl font-bold text-base border-2 border-white/30 hover:border-white/60 hover:bg-white/20 transition-all hover:-translate-y-1"
               >
                 Pelajari Lebih Lanjut
               </a>
