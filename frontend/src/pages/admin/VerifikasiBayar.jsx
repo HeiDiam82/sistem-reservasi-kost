@@ -41,7 +41,7 @@ export default function VerifikasiBayar() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead><tr className="bg-slate-50">
-                {['ID', 'Reservasi', 'Jumlah', 'Metode', 'Tanggal', 'Status', 'Aksi'].map(h => (
+                {['ID', 'Penyewa', 'Kamar', 'Jumlah', 'Metode', 'Tanggal', 'Status', 'Aksi'].map(h => (
                   <th key={h} className="px-6 py-4 text-left text-[10px] font-black text-muted uppercase tracking-widest">{h}</th>
                 ))}
               </tr></thead>
@@ -49,8 +49,12 @@ export default function VerifikasiBayar() {
                 {data.map(p => (
                   <tr key={p.pembayaran_id} className="hover:bg-slate-50/50">
                     <td className="px-6 py-4 text-sm font-bold text-slate-800">#{p.pembayaran_id}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">Reservasi #{p.reservasi_id}</td>
-                    <td className="px-6 py-4 font-black text-primary text-sm">Rp {parseInt(p.jumlah_bayar).toLocaleString('id-ID')}</td>
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-bold text-slate-800">{p.nama_penyewa || 'Penyewa'}</p>
+                      <p className="text-[10px] text-muted">{p.email}</p>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{p.nomor_kamar} ({p.nama_tipe})</td>
+                    <td className="px-6 py-4 font-black text-primary text-sm">Rp {parseFloat(p.jumlah_bayar).toLocaleString('id-ID')}</td>
                     <td className="px-6 py-4 text-sm text-slate-600">{p.metode_bayar || '-'}</td>
                     <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{new Date(p.tanggal_bayar).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
                     <td className="px-6 py-4">

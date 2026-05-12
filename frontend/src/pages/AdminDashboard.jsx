@@ -44,7 +44,7 @@ const AdminDashboard = () => {
         {[
           { label: 'Total Penyewa', value: stats.total_users, icon: '👥', color: 'from-blue-500 to-blue-600' },
           { label: 'Total Reservasi', value: stats.total_reservasi, icon: '📋', color: 'from-orange-500 to-orange-600' },
-          { label: 'Pendapatan', value: `Rp ${parseInt(stats.total_pendapatan || 0).toLocaleString('id-ID')}`, icon: '💰', color: 'from-emerald-500 to-emerald-600' },
+          { label: 'Pendapatan', value: `Rp ${parseFloat(stats.total_pendapatan || 0).toLocaleString('id-ID')}`, icon: '💰', color: 'from-emerald-500 to-emerald-600' },
           { label: 'Kamar Tersedia', value: stats.kamar_tersedia, icon: '🏠', color: 'from-indigo-500 to-indigo-600' },
         ].map(c => (
           <div key={c.label} className="bg-white rounded-2xl p-6 shadow-premium border border-slate-100 group hover:border-secondary/20 transition-all">

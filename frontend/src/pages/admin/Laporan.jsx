@@ -3,29 +3,38 @@ import { fetchWithAuth } from '../../api/config';
 
 export default function Laporan() {
   const [reservations, setReservations] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchWithAuth('/reservasi').then(r => r.json()).then(d => {
-      if (d.success) setReservations(d.data || []);
+    Promise.all([
+      fetchWithAuth('/reservasi').then(r => r.json()),
+      fetchWithAuth('/pembayaran').then(r => r.json())
+    ]).then(([resData, payData]) => {
+      if (resData.success) setReservations(resData.data || []);
+      if (payData.success) setPayments(payData.data || []);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
-  const confirmed = reservations.filter(r => ['dikonfirmasi', 'berjalan', 'selesai'].includes(r.status));
-  const totalPendapatan = confirmed.reduce((s, r) => s + parseFloat(r.total_harga || 0), 0);
+  // Filter payments with status 'berhasil'
+  const successfulPayments = payments.filter(p => p.status === 'berhasil');
+  const totalPendapatan = successfulPayments.reduce((s, p) => s + parseFloat(p.jumlah_bayar || 0), 0);
+  
   const totalSelesai = reservations.filter(r => r.status === 'selesai').length;
   const totalAktif = reservations.filter(r => ['dikonfirmasi', 'berjalan'].includes(r.status)).length;
   const totalDitolak = reservations.filter(r => ['ditolak', 'dibatalkan'].includes(r.status)).length;
 
-  // Group by month
+  // Group payments by month
   const byMonth = {};
-  confirmed.forEach(r => {
-    const d = new Date(r.tanggal_masuk);
+  successfulPayments.forEach(p => {
+    const d = new Date(p.tanggal_bayar);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     if (!byMonth[key]) byMonth[key] = { count: 0, total: 0 };
+    // count number of unique reservations in this month
+    // (optional: or just count number of payments)
     byMonth[key].count++;
-    byMonth[key].total += parseFloat(r.total_harga || 0);
+    byMonth[key].total += parseFloat(p.jumlah_bayar || 0);
   });
   const months = Object.entries(byMonth).sort((a, b) => b[0].localeCompare(a[0]));
 
@@ -61,7 +70,7 @@ export default function Laporan() {
         ) : (
           <table className="w-full">
             <thead><tr className="bg-slate-50">
-              {['Bulan', 'Jumlah Reservasi', 'Total Pendapatan'].map(h => (
+              {['Bulan', 'Jumlah Transaksi', 'Total Pendapatan'].map(h => (
                 <th key={h} className="px-6 py-4 text-left text-[10px] font-black text-muted uppercase tracking-widest">{h}</th>
               ))}
             </tr></thead>
@@ -72,7 +81,7 @@ export default function Laporan() {
                 return (
                   <tr key={key} className="hover:bg-slate-50/50">
                     <td className="px-6 py-4 font-bold text-slate-800">{monthName}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{val.count} reservasi</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{val.count} transaksi</td>
                     <td className="px-6 py-4 font-black text-emerald-600">Rp {val.total.toLocaleString('id-ID')}</td>
                   </tr>
                 );
@@ -81,7 +90,7 @@ export default function Laporan() {
             <tfoot>
               <tr className="bg-slate-50 border-t border-slate-200">
                 <td className="px-6 py-4 font-black text-primary">TOTAL</td>
-                <td className="px-6 py-4 font-bold text-slate-700">{confirmed.length} reservasi</td>
+                <td className="px-6 py-4 font-bold text-slate-700">{successfulPayments.length} transaksi</td>
                 <td className="px-6 py-4 font-black text-emerald-600 text-lg">Rp {totalPendapatan.toLocaleString('id-ID')}</td>
               </tr>
             </tfoot>

@@ -74,7 +74,7 @@ export default function ReservasiMasuk() {
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{new Date(r.tanggal_masuk).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}</td>
                     <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{new Date(r.tanggal_keluar).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}</td>
-                    <td className="px-6 py-4 font-black text-primary text-sm whitespace-nowrap">Rp {parseInt(r.total_harga).toLocaleString('id-ID')}</td>
+                    <td className="px-6 py-4 font-black text-primary text-sm whitespace-nowrap">Rp {parseFloat(r.total_harga).toLocaleString('id-ID')}</td>
                     <td className="px-6 py-4">
                       <span className={`text-[10px] font-black px-3 py-1 rounded-full border uppercase ${STATUS[r.status]||'bg-slate-100 text-slate-600'}`}>{r.status}</span>
                     </td>
