@@ -11,7 +11,7 @@ export const getStats = async () => {
         db.query(`SELECT COUNT(*) FROM users WHERE role = 'penyewa'`),
         db.query(`SELECT COUNT(*) FROM reservasi`),
         db.query(`SELECT COALESCE(SUM(jumlah_bayar), 0) AS total FROM pembayaran WHERE status = 'berhasil'`),
-        db.query(`SELECT COUNT(*) FROM kamar WHERE status = 'tersedia'`),
+        db.query(`SELECT COUNT(*) FROM kamar WHERE status = 'tersedia' AND deleted_at IS NULL`),
         db.query(`SELECT COUNT(*) FROM pembayaran WHERE status = 'pending'`)
     ]);
 

@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL, fetchWithAuth } from '../../api/config';
+import TrashKamar from './TrashKamar';
 
 export default function KelolaKamar() {
   const [kamar, setKamar] = useState([]);
   const [types, setTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null); // null | 'add' | 'edit'
+  const [showTrash, setShowTrash] = useState(false);
   const [form, setForm] = useState({ nomor_kamar:'', tipe_id:'', lantai:'1', status:'tersedia', foto_kamar:'' });
   const [editId, setEditId] = useState(null);
 
   const load = () => {
     setLoading(true);
     Promise.all([
-      fetch(`${API_BASE_URL}/kamar`).then(r=>r.json()),
-      fetch(`${API_BASE_URL}/tipe-kamar`).then(r=>r.json()),
+      fetchWithAuth('/kamar').then(r=>r.json()),
+      fetchWithAuth('/tipe-kamar').then(r=>r.json()),
     ]).then(([k,t])=>{
       if(k.success) setKamar(k.data);
       if(t.success) setTypes(t.data);
@@ -35,10 +37,21 @@ export default function KelolaKamar() {
   };
 
   const handleDelete = async(id) => {
-    if(!confirm('Hapus kamar ini?')) return;
-    await fetchWithAuth(`/kamar/${id}`,{method:'DELETE'});
-    load();
+    if(!confirm('Pindahkan kamar ini ke trash?')) return;
+    try {
+      const res = await fetchWithAuth(`/kamar/${id}`,{method:'DELETE'});
+      const data = await res.json();
+      if(data.success) {
+        load();
+      } else {
+        alert('Gagal menghapus: ' + data.message);
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan saat menghapus.');
+    }
   };
+
+  if (showTrash) return <TrashKamar onBack={() => { setShowTrash(false); load(); }} />;
 
   const statusColor = s => s==='tersedia'?'bg-emerald-100 text-emerald-700':s==='perbaikan'?'bg-amber-100 text-amber-700':'bg-rose-100 text-rose-700';
 
@@ -46,7 +59,10 @@ export default function KelolaKamar() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-black text-primary">Kelola Kamar</h2>
-        <button onClick={openAdd} className="btn-secondary px-6 py-2.5 text-sm">➕ Tambah Kamar</button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowTrash(true)} className="w-10 h-10 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-100 transition-all" title="Lihat Trash">🗑️</button>
+          <button onClick={openAdd} className="btn-secondary px-6 py-2.5 text-sm font-black">➕ Tambah Kamar</button>
+        </div>
       </div>
 
       {loading ? <div className="py-20 text-center text-muted">Memuat...</div> : (
@@ -58,7 +74,9 @@ export default function KelolaKamar() {
               ))}
             </tr></thead>
             <tbody className="divide-y divide-slate-50">
-              {kamar.map(k=>(
+              {kamar.length === 0 ? (
+                <tr><td colSpan="6" className="py-16 text-center text-muted italic">Belum ada data kamar aktif</td></tr>
+              ) : kamar.map(k=>(
                 <tr key={k.kamar_id} className="hover:bg-slate-50/50">
                   <td className="px-6 py-4">
                     <div className="w-16 h-12 rounded-xl overflow-hidden bg-slate-100">
@@ -66,13 +84,13 @@ export default function KelolaKamar() {
                     </div>
                   </td>
                   <td className="px-6 py-4 font-bold text-slate-800">{k.nomor_kamar}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{k.nama_tipe}<br/><span className="text-xs text-muted">Rp {parseInt(k.harga_bulan).toLocaleString('id-ID')}/bln</span></td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{k.nama_tipe}<br/><span className="text-xs text-muted font-bold">Rp {parseFloat(k.harga_bulan).toLocaleString('id-ID')}/bln</span></td>
                   <td className="px-6 py-4 text-sm text-slate-600">Lantai {k.lantai}</td>
                   <td className="px-6 py-4"><span className={`text-xs font-bold px-3 py-1 rounded-full capitalize ${statusColor(k.status)}`}>{k.status}</span></td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
-                      <button onClick={()=>openEdit(k)} className="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all text-sm">✏️</button>
-                      <button onClick={()=>handleDelete(k.kamar_id)} className="w-9 h-9 flex items-center justify-center rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all text-sm">🗑️</button>
+                      <button onClick={()=>openEdit(k)} title="Edit" className="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all text-sm">✏️</button>
+                      <button onClick={()=>handleDelete(k.kamar_id)} title="Hapus ke Trash" className="w-9 h-9 flex items-center justify-center rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all text-sm">🗑️</button>
                     </div>
                   </td>
                 </tr>
