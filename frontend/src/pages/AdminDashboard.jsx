@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL, fetchWithAuth } from '../api/config';
-import KelolaKamar from './admin/KelolKamar';
+import KelolaKamar from './admin/KelolaKamar';
 import ReservasiMasuk from './admin/ReservasiMasuk';
 import VerifikasiBayar from './admin/VerifikasiBayar';
 import Laporan from './admin/Laporan';
@@ -22,13 +22,16 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_BASE_URL}/dashboard`, { credentials: 'include' }).then(r => r.json()),
+      fetchWithAuth('/dashboard').then(r => r.json()),
       fetchWithAuth('/reservasi').then(r => r.json()),
     ]).then(([s, r]) => {
       if (s.success) setStats(s.data);
       if (r.success) setReservations(r.data);
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch((err) => {
+      console.error('Fetch error:', err);
+      setLoading(false);
+    });
   }, []);
 
   const recent = reservations.slice(0, 5);

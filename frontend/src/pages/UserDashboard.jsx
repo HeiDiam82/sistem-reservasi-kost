@@ -6,8 +6,12 @@ const UserDashboard = ({ user }) => {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showBayarModal, setShowBayarModal] = useState(false);
+  const [selectedRes, setSelectedRes] = useState(null);
+  const [bayarForm, setBayarForm] = useState({ metode_bayar: 'Transfer Bank' });
 
-  useEffect(() => {
+  const loadData = () => {
+    setLoading(true);
     fetchWithAuth('/reservasi')
       .then(res => res.json())
       .then(data => {
@@ -23,10 +27,42 @@ const UserDashboard = ({ user }) => {
         setError('Terjadi kesalahan koneksi.');
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    loadData();
   }, []);
 
+  const openBayarModal = (res) => {
+    setSelectedRes(res);
+    setShowBayarModal(true);
+  };
+
+  const handleBayarSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetchWithAuth('/pembayaran', {
+        method: 'POST',
+        body: JSON.stringify({
+          reservasi_id: selectedRes.reservasi_id,
+          jumlah_bayar: selectedRes.total_harga,
+          metode_bayar: bayarForm.metode_bayar
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setShowBayarModal(false);
+        loadData(); // Reload data
+      } else {
+        alert(data.message);
+      }
+    } catch (err) {
+      alert('Gagal mengirim bukti bayar');
+    }
+  };
+
   const getStatusBadge = (status) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'menunggu': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
       case 'dikonfirmasi': return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'berjalan': return 'bg-green-100 text-green-700 border-green-200';
@@ -100,8 +136,15 @@ const UserDashboard = ({ user }) => {
                 </div>
 
                 <div className="flex items-center gap-3 md:border-l md:border-slate-100 md:pl-6">
-                  {res.status === 'menunggu' ? (
-                    <button className="w-full md:w-auto bg-primary text-white font-bold py-3 px-6 rounded-xl hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20">
+                  {res.status_pembayaran === 'pending' ? (
+                    <div className="bg-amber-50 text-amber-600 px-6 py-3 rounded-xl border border-amber-100 font-bold text-center text-sm">
+                      Menunggu Verifikasi
+                    </div>
+                  ) : (res.status === 'menunggu' || res.status === 'dikonfirmasi') ? (
+                    <button 
+                      onClick={() => openBayarModal(res)}
+                      className="w-full md:w-auto bg-primary text-white font-bold py-3 px-6 rounded-xl hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20"
+                    >
                       Bayar Sekarang
                     </button>
                   ) : (
@@ -115,6 +158,52 @@ const UserDashboard = ({ user }) => {
           </div>
         )}
       </div>
+
+      {/* Payment Modal */}
+      {showBayarModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-primary-deep/60 backdrop-blur-md">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-2xl font-black text-primary">Konfirmasi Bayar</h3>
+              <button onClick={() => setShowBayarModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-200 transition-colors text-xl">✕</button>
+            </div>
+            <form onSubmit={handleBayarSubmit} className="p-8 space-y-6">
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total yang harus dibayar</p>
+                <p className="text-3xl font-black text-secondary">Rp {parseInt(selectedRes?.total_harga).toLocaleString('id-ID')}</p>
+                <div className="mt-4 pt-4 border-t border-slate-200 text-sm">
+                  <p className="flex justify-between">
+                    <span className="text-muted">Kamar</span>
+                    <span className="font-bold text-primary">{selectedRes?.nomor_kamar} ({selectedRes?.nama_tipe})</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Metode Pembayaran</label>
+                <select 
+                  className="input-premium appearance-none"
+                  value={bayarForm.metode_bayar}
+                  onChange={(e) => setBayarForm({ ...bayarForm, metode_bayar: e.target.value })}
+                >
+                  <option value="Transfer Bank">Transfer Bank (BCA/Mandiri)</option>
+                  <option value="E-Wallet">E-Wallet (Gopay/OVO/Dana)</option>
+                  <option value="Tunai">Tunai ke Admin</option>
+                </select>
+              </div>
+
+              <div className="pt-4">
+                <button type="submit" className="w-full btn-secondary py-4 text-lg font-black shadow-xl shadow-secondary/20">
+                  Kirim Bukti Bayar
+                </button>
+                <p className="text-center text-[10px] text-muted mt-4 font-bold uppercase tracking-widest italic">
+                  *Dengan mengklik tombol, Anda menyatakan telah melakukan pembayaran sesuai nominal di atas.
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
