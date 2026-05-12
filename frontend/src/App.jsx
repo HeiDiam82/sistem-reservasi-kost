@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Auth from './pages/Auth';
 import RoomDetails from './pages/RoomDetails';
 import AdminDashboard from './pages/AdminDashboard';
+import Rooms from './pages/Rooms';
 import './App.css';
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/rooms" element={<Rooms />} />
             <Route path="/rooms/:id" element={<RoomDetails user={user} />} />
             <Route 
               path="/login" 
